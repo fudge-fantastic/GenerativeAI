@@ -3,8 +3,9 @@ __pycache__/
 .vscode/
 
 # Distribution / packaging
-Images/
-pdfs/
+Images/Private
+pdfs/Private
+Processed Images/
 main.ipynb
 using_genai_only.ipynb
 tersseract_workflow.ipynb

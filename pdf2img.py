@@ -3,9 +3,9 @@
 from pdf2image import convert_from_path
 import os
 
-pdf_folder = r"D:\CODING\Test\Python\pdfs"
-poppler_path = r"D:\CODING\Test\Python\poppler-24.02.0\Library\bin"
-save_files = r"D:\CODING\Test\Python\Images"
+pdf_folder = r"pdfs/"
+poppler_path = r"poppler-24.02.0/Library/bin"
+save_files = r"Images/"
 pdf_files = [file for file in os.listdir(pdf_folder) if file.endswith(".pdf")]
 
 for pdf_file in pdf_files:
