@@ -3,8 +3,8 @@ __pycache__/
 .vscode/
 
 # Distribution / packaging
-Images/Private
-pdfs/Private
+Gemini/Images/Private
+Gemini/pdfs/Private
 Processed Images/
 main.ipynb
 using_genai_only.ipynb
