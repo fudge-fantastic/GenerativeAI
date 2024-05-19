@@ -1,3 +1,18 @@
+## [FastAPI - Learn FastAPI](https://fastapi.tiangolo.com/tutorial/)
+```
+from fastapi import FastAPI
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+if __name__ == '__main__':
+  uvicorn.run("main:app", host="localhost", port=8000)
+```
+1. fastapi dev main.py (in terminal) OR 
+2. python main.py (if using (if __name__ == '__main__'))
+
 ## [Tesseract-Fix](https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)
 
 **Installing Tesseract Binary:**
