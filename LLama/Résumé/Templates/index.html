@@ -54,6 +54,18 @@
         .hidden {
             display: none;
         }
+        .button-group {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .button-group .btn {
+            margin-right: 10px;
+        }
+        .alert {
+            margin-top: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -61,18 +73,22 @@
         <h1 class="mb-4">Resume Analyzer</h1>
         <form id="resumeForm" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="resume">Upload Resume:</label>
+                <label for="resume">Upload Resume (.pdf or .docx)</label>
                 <input type="file" class="form-control-file" id="resume" name="resume" required>
             </div>
             <div class="form-group">
                 <label for="jobDescription">Job Description:</label>
                 <textarea class="form-control" id="jobDescription" name="job_description" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Compare</button>
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">Compare</button>
+                <button id="copyButton" class="btn btn-secondary hidden">Copy to Clipboard</button>
+            </div>
             <!-- Loader element -->
             <div class="loader hidden" id="loader"></div>
         </form>
         <div id="comparison"></div>
+        <div class="alert alert-danger" id="errorAlert"></div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -83,8 +99,10 @@
                 event.preventDefault();
                 var formData = new FormData(this);
 
-                // Show loader
+                // Show loader and hide copy button and error alert
                 $('#loader').removeClass('hidden');
+                $('#copyButton').addClass('hidden');
+                $('#errorAlert').hide();
 
                 $.ajax({
                     url: '/compare',
@@ -93,16 +111,38 @@
                     processData: false,
                     contentType: false,
                     success: function(response){
-                        $('#comparison').html('<h2>Comparison Result:</h2><div id="markdown"></div>');
-                        var converter = new showdown.Converter();
-                        var html = converter.makeHtml(response.comparison);
-                        $('#markdown').html(html);
+                        if (response.comparison) {
+                            $('#comparison').html('<h2>Comparison Result:</h2><div id="markdown"></div>');
+                            var converter = new showdown.Converter();
+                            var html = converter.makeHtml(response.comparison);
+                            $('#markdown').html(html);
+                            // Show copy button
+                            $('#copyButton').removeClass('hidden');
+                        } else if (response.error) {
+                            $('#errorAlert').text(response.error).show();
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#errorAlert').text('The file format is invalid! Please try again.').show();
                     },
                     complete: function() {
                         // Hide loader when request completes (success or failure)
                         $('#loader').addClass('hidden');
                     }
                 });
+            });
+
+            $('#copyButton').click(function(event) {
+                // Prevent default button behavior
+                event.preventDefault();
+                // Create a temporary textarea element
+                var tempTextarea = document.createElement("textarea");
+                tempTextarea.value = $('#markdown').text();
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempTextarea);
+                alert("Comparison result copied to clipboard!");
             });
         });
     </script>
