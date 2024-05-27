@@ -22,7 +22,7 @@ def get_llama_assistance(prompt):
             {"role": "user", "content": prompt},
             {"role": "assistant", "content": ""}
         ],
-        temperature=1.4,
+        temperature=1.5,
         max_tokens=8192,
         top_p=1,
         stream=True,
@@ -57,7 +57,7 @@ def index():
 def compare():
     try:
         resume_file = request.files['resume']
-        job_description = request.form['job_description']
+        job_description = request.form.get('job_description')
 
         if resume_file.filename.endswith('.pdf'):
             with pdfplumber.open(resume_file) as pdf:
@@ -73,17 +73,25 @@ def compare():
         else:
             raise ValueError('Unsupported file format. Please upload a PDF or DOCX file.')
 
-        main_role = '''[You're a professional consultant helping people land their dream job, by analyzing the job description and their resume details.
-        You'll highlight relevant skills, experiences, identify any missing qualifications, 
-        and suggest areas for further exploration to strengthen their candidacy (suggest softwares or tools as well). 
+        main_role = '''[You're a professional consultant helping people land their dream job, by analyzing the job description and their resume details. YOU DO NOT HAVE TO MENTION YOUR ROLE TO THE USER, start direct to the point.
+        You'll identify discrepancies, recommend areas for improvement, align candidate qualifications with company expectations, and outline areas of development. 
+        This involves discerning the candidate's strengths and weaknesses, assessing their compatibility with the company's needs, and proposing actionable steps for improvement. 
         However, if the job description (JD) is entirely unrelated to the resume, strictly recommend them to prioritize focusing on the relevant areas instead of the unrelated ones.
-        Note this: If you find both the Resume/Job-Description data is irrelevant, be bold and answer them about its irrelevance. And be wild with the response. 
-        And if the name's not mentioned, call him/her with something cool name. We want to provide comprehensive support to help people achieve their goals. 
-        And yes, please feel free to give detailed and extensive response if needed]'''
+        Note this: If you find both the Resume/Job-Description data is irrelevant, be bold and answer them about its irrelevance, be wild with the responses. One more thing, feel free to write 8000 tokens]'''
 
-        comparison = get_llama_assistance(f'''{main_role}
-        Here's the Job Description: [{job_description}] 
-        And here's the Resume Details: [{all_text}]''')
+        main_role2 = '''You're a professional Resume Analyzer, assisting individuals in reviewing and enhancing their resumes. DO NOT MENTION YOUR ROLE
+        (Note: You are provided with extracted data from .pdf or .docx files. If you encounter difficulties interpreting the data or resume details, 
+        don't hesitate to ask the individual to follow a clear and organized resume format. Emphasize the importance of a well-structured resume, 
+        as it significantly increases the chances of being shortlisted by employers. 
+        Explain that a neat and professional resume can make a strong first impression and effectively showcase their qualifications and achievements.) 
+        Also at the end or before summary, score their resume at the scale of 1 to 10. One more thing, feel free to write 8000 tokens.'''
+        if job_description:
+            comparison = get_llama_assistance(f'''{main_role}
+            Here's the Job Description: [{job_description}] 
+            And here's the Resume Details: [{all_text}]''')
+        else:
+            comparison = get_llama_assistance(f'''{main_role2}
+            Here's the Resume Details: [{all_text}]''')
 
         return jsonify({'comparison': comparison})
     except ValueError as e:

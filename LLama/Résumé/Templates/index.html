@@ -78,10 +78,11 @@
             </div>
             <div class="form-group">
                 <label for="jobDescription">Job Description:</label>
-                <textarea class="form-control" id="jobDescription" name="job_description" required></textarea>
+                <textarea class="form-control" id="jobDescription" name="job_description"></textarea>
             </div>
             <div class="button-group">
-                <button type="submit" class="btn btn-primary">Compare</button>
+                <button type="submit" class="btn btn-primary" id="compareBtn">Compare</button>
+                <button type="submit" class="btn btn-secondary" id="reviewBtn">Review Resume</button>
                 <button id="copyButton" class="btn btn-secondary hidden">Copy to Clipboard</button>
             </div>
             <!-- Loader element -->
@@ -143,6 +144,11 @@
                 document.execCommand("copy");
                 document.body.removeChild(tempTextarea);
                 alert("Comparison result copied to clipboard!");
+            });
+
+            // Change form action when review button is clicked
+            $('#reviewBtn').click(function() {
+                $('#resumeForm').attr('action', '/review');
             });
         });
     </script>
