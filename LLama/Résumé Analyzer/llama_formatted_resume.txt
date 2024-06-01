@@ -1,0 +1,68 @@
+I'd be happy to help you organize and review the resume text you extracted from a PDF. Here's a reorganized version, categorized into sections for easier readability:
+
+**Contact Information**
+
+* Email: adi.pandagle@gmail.com
+* Phone: +91 79725 67926
+* LinkedIn: [link]
+* GitHub: [link]
+
+**Summary/Professional Summary**
+(not specified, but this is where a brief summary of your experience and skills would go)
+
+**Education**
+
+* Post Graduation Program in Data Science and Analytics, Imarticus Learning (Pune), 2023-2024
+* Bachelor's in Business Administration (Computer Application), Modern College of Commerce & Computer Studies; Savitribai Phule Pune University Affiliated, 2020-2023
+* Senior Secondary School - PDEA's Shri Mhalsakant Vidyalaya & Jr. College, 2018-2020
+* High School - S.P.M English Medium School, Nigdi-Pune, 2007-2018
+
+**Skills**
+
+* **Machine Learning and Deep Learning**: Supervised Learning, Unsupervised Learning, Neural Networks, NLP, DL Frameworks (TensorFlow and Keras)
+* **Data Science**: Data Analysis & Visualization, Statistical Analysis & Modeling, Feature Engineering & Optimization Techniques
+* **MLOps**: MLflow, Packaging, Version Control (Git), Docker, Jenkins, Prometheus, and CI/CD Pipeline
+* **Web Development, Programming Languages & Databases**: Flask, FastAPI, Django, Data Structures & Algorithms (DSA), Python, and MySQL
+* **Cloud**: Amazon Web Services (EC2, S3, SageMaker, and others)
+* **Auxilary Skills**: Engineering, DSA (Basics), Web Development, Programming Languages, and Databases
+
+**Projects**
+(Note: These can be reordered or regrouped to better showcase your experience)
+
+* **Machine Learning**:
+	+ Fraud Detection: Identifying fraudulent activities within financial transactions using ML
+	+ Credit Risk Assessment: Assessing credit risk for loan applicants using predictive modeling
+	+ House Rent Prediction: Using machine learning algorithms to predict house rent prices in India
+	+ Customer Discount Offering Prediction: Predicting which customers will likely receive discounts for targeted marketing
+* **Deep Learning**:
+	+ American Sign Language Detection: Developed a model to recognize and interpret American Sign Language gestures for communication accessibility
+* **Generative-AI**:
+	+ OCR-Gemini: Leveraged Tesseract for invoice text extraction and Gemini for data structuring the extracted data into JSON format
+* **Other Projects**:
+	+ OAuth-JD Analyzer: Implementing data extraction methods to input data into LLama3, facilitating analysis of both job descriptions (JD) and resumes
+	+ Query-Builder: Utilizing PostgreSQL as the database backend, extracting key content, and seamlessly integrating it into LLama3 for query generation and execution
+	+ Django: Utilized Django to create a web-based diabetes prediction model
+	+ MLOps Sandbox: MLOps Integration Testing (Docker, Jenkins, CI/CD)
+
+**Certifications and Achievements**
+
+* Udemy: Python for Data Science and Machine Learning Bootcamp
+* Udemy: Python Data Structures and Algorithm
+* Udemy: Amazon Web Services - Solution Architect
+* Kaggle - Beginner and Intermediate Machine Learning
+* HackerRank - SQL Basic and Intermediate
+* Ranked 1st in chess competitions during both the 2nd and 3rd years of academic journey
+
+**Hobbies**
+
+* Avid Reader
+* Artist (sketching figures and objects)
+* Strategic Chess Player
+* Video/Board Games
+* Coding
+* Problem-solving
+* Inquisitive Listening
+* Creating Lo-fi tracks for fun on YouTube
+* LLamu( LLlama)
+ AUX Skills:
+ * GitHub-profile

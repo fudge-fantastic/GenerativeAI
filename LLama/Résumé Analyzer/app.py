@@ -3,7 +3,7 @@ import dotenv
 import pdfplumber
 import docx
 import re
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, send_file
 from groq import Groq
 
 dotenv.load_dotenv()
@@ -79,12 +79,8 @@ def compare():
         However, if the job description (JD) is entirely unrelated to the resume, strictly recommend them to prioritize focusing on the relevant areas instead of the unrelated ones.
         Note this: If you find both the Resume/Job-Description data is irrelevant, be bold and answer them about its irrelevance, be wild with the responses. One more thing, feel free to write 8000 tokens]'''
 
-        main_role2 = '''You're a professional Resume Analyzer, assisting individuals in reviewing and enhancing their resumes. DO NOT MENTION YOUR ROLE
-        (Note: You are provided with extracted data from .pdf or .docx files. If you encounter difficulties interpreting the data or resume details, 
-        don't hesitate to ask the individual to follow a clear and organized resume format. Emphasize the importance of a well-structured resume, 
-        as it significantly increases the chances of being shortlisted by employers. 
-        Explain that a neat and professional resume can make a strong first impression and effectively showcase their qualifications and achievements.) 
-        Also at the end or before summary, score their resume at the scale of 1 to 10. One more thing, feel free to write 8000 tokens.'''
+        main_role2 = '''You're assisting individuals in reviewing and enhancing their resumes. DO NOT MENTION YOUR ROLE. You can be bold and strict about the review.
+        Also at the beginning, you'll score their resume at the scale of 1 to 10. One more thing, feel free to write 8000 tokens.'''
         if job_description:
             comparison = get_llama_assistance(f'''{main_role}
             Here's the Job Description: [{job_description}] 
@@ -94,6 +90,44 @@ def compare():
             Here's the Resume Details: [{all_text}]''')
 
         return jsonify({'comparison': comparison})
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': 'An unexpected error occurred. Please try again later.'}), 500
+    
+@app.route('/view_resume', methods=['POST'])
+def view_resume():
+    try:
+        resume_file = request.files['resume']
+
+        if resume_file.filename.endswith('.pdf'):
+            with pdfplumber.open(resume_file) as pdf:
+                all_text = ""
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text:
+                        all_text += text + "\n\n"
+            all_text = clean_text(all_text)
+            llama_formatted_text = get_llama_assistance(f'''I need your help to organize the Resume text, I extracted from a PDF and review:
+                                                    {all_text}''')
+            # Save the formatted text to a temporary file
+            FILENAME = "llama_formatted_resume.txt"
+            with open(FILENAME, 'w') as f:
+                f.write(llama_formatted_text)
+            # Return the temporary file to the user
+            return send_file(FILENAME, as_attachment=True)
+        elif resume_file.filename.endswith('.docx'):
+            all_text = extract_text_from_docx(resume_file)
+            all_text = clean_text(all_text)
+            llama_formatted_text = get_llama_assistance(f'''[I need your help to organize the Resume text that we're extracting it from a DOCX and review, if the DOCX file is irrelevant, start with something like, are you sure this is a Resume?]:
+                                                    {all_text}''')
+            # Save the formatted text to a temporary file
+            with open('llama_formatted_resume.txt', 'w') as f:
+                f.write(llama_formatted_text)
+            # Return the temporary file to the user
+            return send_file('llama_formatted_resume.txt', as_attachment=True)
+        else:
+            raise ValueError('Unsupported file format. Please upload a PDF or DOCX file.')
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:

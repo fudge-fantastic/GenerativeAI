@@ -83,6 +83,7 @@
             <div class="button-group">
                 <button type="submit" class="btn btn-primary" id="compareBtn">Compare</button>
                 <button type="submit" class="btn btn-secondary" id="reviewBtn">Review Resume</button>
+                <button type="button" class="btn btn-secondary" id="viewPdfContentBtn">View Resume Content</button>
                 <button id="copyButton" class="btn btn-secondary hidden">Copy to Clipboard</button>
             </div>
             <!-- Loader element -->
@@ -92,8 +93,30 @@
         <div class="alert alert-danger" id="errorAlert"></div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="contentModal" tabindex="-1" role="dialog" aria-labelledby="contentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contentModalLabel">Formatted Resume Content</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="formattedContent" class="markdown-body"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="downloadBtn">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function(){
             $('#resumeForm').submit(function(event){
@@ -113,7 +136,7 @@
                     contentType: false,
                     success: function(response){
                         if (response.comparison) {
-                            $('#comparison').html('<h2>Comparison Result:</h2><div id="markdown"></div>');
+                            $('#comparison').html('<h2>Result:</h2><div id="markdown"></div>');
                             var converter = new showdown.Converter();
                             var html = converter.makeHtml(response.comparison);
                             $('#markdown').html(html);
@@ -143,12 +166,46 @@
                 tempTextarea.select();
                 document.execCommand("copy");
                 document.body.removeChild(tempTextarea);
-                alert("Comparison result copied to clipboard!");
+                alert("Text copied to clipboard!");
             });
 
             // Change form action when review button is clicked
             $('#reviewBtn').click(function() {
                 $('#resumeForm').attr('action', '/review');
+            });
+
+            // Add click event listener for the "View PDF Content" button
+            $('#viewPdfContentBtn').click(function(event) {
+                event.preventDefault();
+                var formData = new FormData($('#resumeForm')[0]);
+                $.ajax({
+                    url: '/view_resume',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        // Convert markdown to HTML and display it in the modal
+                        var converter = new showdown.Converter();
+                        var html = converter.makeHtml(response);
+                        $('#formattedContent').html(html);
+                        $('#contentModal').modal('show');
+
+                        // Set up the download button
+                        $('#downloadBtn').off('click').on('click', function() {
+                            var blob = new Blob([response], { type: 'text/plain' });
+                            var link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(blob);
+                            link.download = 'formatted_resume.md';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        });
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#errorAlert').text('An error occurred while fetching the PDF content. Please try again.').show();
+                    }
+                });
             });
         });
     </script>
