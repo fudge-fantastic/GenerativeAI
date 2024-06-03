@@ -38,63 +38,118 @@ def get_llama_assistance(prompt):
 
 def extract_text_from_docx(file):
     doc = docx.Document(file)
-    full_text = []
-    for para in doc.paragraphs:
-        full_text.append(para.text.strip())
+    full_text = [para.text.strip() for para in doc.paragraphs]
     return '\n\n'.join(full_text)
 
 def clean_text(text):
     # Remove extra newlines and leading/trailing whitespace
-    text = re.sub(r'\n\s*\n', '\n\n', text) 
-    text = text.strip()  
+    text = re.sub(r'\n\s*\n', '\n\n', text)
+    text = text.strip()
     return text
+
+ERROR_MESSAGE = 'An unexpected error occurred. Please try again later.'
+INPUT_ERROR = 'Please provide both a Resume and a Job Description.'
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+DOCX_EXTENSION = '.docx'
 @app.route('/compare', methods=['POST'])
 def compare():
     try:
         resume_file = request.files['resume']
         job_description = request.form.get('job_description')
 
+        if not resume_file or not job_description:
+            raise ValueError('Please provide both a Resume and a Job Description.')
+
         if resume_file.filename.endswith('.pdf'):
             with pdfplumber.open(resume_file) as pdf:
-                all_text = ""
-                for page in pdf.pages:
-                    text = page.extract_text()
-                    if text:
-                        all_text += text + "\n\n"
+                all_text = "\n\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
             all_text = clean_text(all_text)
-        elif resume_file.filename.endswith('.docx'):
+        elif resume_file.filename.endswith(DOCX_EXTENSION):
             all_text = extract_text_from_docx(resume_file)
             all_text = clean_text(all_text)
         else:
-            raise ValueError('Unsupported file format. Please upload a PDF or DOCX file.')
+            raise ValueError(f'Unsupported file format. Please upload a PDF or {DOCX_EXTENSION} file.')
+
+        # Step to structure the document
+        structured_text = get_llama_assistance(f'''I need your help to organize and structure the Resume text, even personal information:
+                                                {all_text}''')
 
         main_role = '''[You're a professional consultant helping people land their dream job, by analyzing the job description and their resume details. YOU DO NOT HAVE TO MENTION YOUR ROLE TO THE USER, start direct to the point.
         You'll identify discrepancies, recommend areas for improvement, align candidate qualifications with company expectations, and outline areas of development. 
         This involves discerning the candidate's strengths and weaknesses, assessing their compatibility with the company's needs, and proposing actionable steps for improvement. 
         However, if the job description (JD) is entirely unrelated to the resume, strictly recommend them to prioritize focusing on the relevant areas instead of the unrelated ones.
-        Note this: If you find both the Resume/Job-Description data is irrelevant, be bold and answer them about its irrelevance, be wild with the responses. One more thing, feel free to write 8000 tokens]'''
+        Note this: If you find both the Resume/Job-Description data is irrelevant, be bold and answer them about its irrelevance, be wild with the responses. One more thing, feel free to write as lengthy as you can]'''
 
-        main_role2 = '''You're assisting individuals in reviewing and enhancing their resumes. DO NOT MENTION YOUR ROLE. You can be bold and strict about the review.
-        Also at the beginning, you'll score their resume at the scale of 1 to 10. One more thing, feel free to write 8000 tokens.'''
-        if job_description:
-            comparison = get_llama_assistance(f'''{main_role}
-            Here's the Job Description: [{job_description}] 
-            And here's the Resume Details: [{all_text}]''')
-        else:
-            comparison = get_llama_assistance(f'''{main_role2}
-            Here's the Resume Details: [{all_text}]''')
+        comparison = get_llama_assistance(f'''{main_role}
+        Here's the Job Description: [{job_description}] 
+        And here's the Resume Details: [{structured_text}]''')
 
         return jsonify({'comparison': comparison})
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:
-        return jsonify({'error': 'An unexpected error occurred. Please try again later.'}), 500
-    
+        return jsonify({'error': ERROR_MESSAGE}), 500
+
+@app.route('/review', methods=['POST'])
+def review():
+    try:
+        resume_file = request.files['resume']
+
+        if not resume_file:
+            raise ValueError('Please upload a resume to review.')
+
+        if resume_file.filename.endswith('.pdf'):
+            with pdfplumber.open(resume_file) as pdf:
+                all_text = "\n\n".join(page.extract_text(DOCX_EXTENSION) for page in pdf.pages if page.extract_text())
+            all_text = clean_text(all_text)
+        elif resume_file.filename.endswith():
+            all_text = extract_text_from_docx(resume_file)
+            all_text = clean_text(all_text)
+        else:
+            raise ValueError('Unsupported file format. Please upload a PDF or DOCX file.')
+
+        review_prompt = f'''Please review the following resume text and provide a detailed analysis. Highlight strengths, weaknesses, and areas for improvement:
+                            {all_text}'''
+
+        review = get_llama_assistance(review_prompt)
+
+        return jsonify({'review': review})
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': ERROR_MESSAGE}), 500
+
+@app.route('/ask_question', methods=['POST'])
+def ask_question():
+    try:
+        review_text = request.form.get('review_text')
+        user_question = request.form.get('user_question')
+
+        if not review_text or not user_question:
+            raise ValueError('Both review text and user question are required.')
+
+        prompt = f'''Based on the following content (given solely by you), answer the user's question in detail.
+        It can be any question, so remember to be friendly and open :) Don't mention your role.
+        Your Content Review:
+        {review_text}
+
+        User Question:
+        {user_question}
+
+        Response:'''
+        
+        response = get_llama_assistance(prompt)
+
+        return jsonify({'response': response})
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': ERROR_MESSAGE}), 500
+
 @app.route('/view_resume', methods=['POST'])
 def view_resume():
     try:
@@ -102,36 +157,27 @@ def view_resume():
 
         if resume_file.filename.endswith('.pdf'):
             with pdfplumber.open(resume_file) as pdf:
-                all_text = ""
-                for page in pdf.pages:
-                    text = page.extract_text()
-                    if text:
-                        all_text += text + "\n\n"
+                all_text = "\n\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
             all_text = clean_text(all_text)
-            llama_formatted_text = get_llama_assistance(f'''I need your help to organize the Resume text, I extracted from a PDF and review:
-                                                    {all_text}''')
-            # Save the formatted text to a temporary file
-            FILENAME = "llama_formatted_resume.txt"
-            with open(FILENAME, 'w') as f:
-                f.write(llama_formatted_text)
-            # Return the temporary file to the user
-            return send_file(FILENAME, as_attachment=True)
-        elif resume_file.filename.endswith('.docx'):
+            structured_text = get_llama_assistance(f'''I need your help to organize and structure the Resume text, don't mention your role or what task you did:
+                                                        {all_text}''')
+        elif resume_file.filename.endswith(DOCX_EXTENSION):
             all_text = extract_text_from_docx(resume_file)
             all_text = clean_text(all_text)
-            llama_formatted_text = get_llama_assistance(f'''[I need your help to organize the Resume text that we're extracting it from a DOCX and review, if the DOCX file is irrelevant, start with something like, are you sure this is a Resume?]:
-                                                    {all_text}''')
-            # Save the formatted text to a temporary file
-            with open('llama_formatted_resume.txt', 'w') as f:
-                f.write(llama_formatted_text)
-            # Return the temporary file to the user
-            return send_file('llama_formatted_resume.txt', as_attachment=True)
+            structured_text = get_llama_assistance(f'''I need your help to organize and structure the Resume text, don't mention your role or what task you did:
+                                                        {all_text}''')
         else:
             raise ValueError('Unsupported file format. Please upload a PDF or DOCX file.')
+
+        FILENAME = "structured_resume.txt"
+        with open(FILENAME, 'w') as f:
+            f.write(structured_text)
+
+        return send_file(FILENAME, as_attachment=True)
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:
-        return jsonify({'error': 'An unexpected error occurred. Please try again later.'}), 500
+        return jsonify({'error': ERROR_MESSAGE}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

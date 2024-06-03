@@ -33,7 +33,6 @@
         .markdown-body {
             line-height: 1.6;
         }
-        /* Loader styles */
         .loader {
             border: 8px solid #f3f3f3; /* Light grey */
             border-top: 8px solid #3498db; /* Blue */
@@ -50,7 +49,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Hide loader by default */
         .hidden {
             display: none;
         }
@@ -81,19 +79,28 @@
                 <textarea class="form-control" id="jobDescription" name="job_description"></textarea>
             </div>
             <div class="button-group">
-                <button type="submit" class="btn btn-primary" id="compareBtn">Compare</button>
-                <button type="submit" class="btn btn-secondary" id="reviewBtn">Review Resume</button>
+                <button type="button" class="btn btn-primary" id="compareBtn">Compare</button>
+                <button type="button" class="btn btn-secondary" id="reviewBtn">Review Resume</button>
                 <button type="button" class="btn btn-secondary" id="viewPdfContentBtn">View Resume Content</button>
                 <button id="copyButton" class="btn btn-secondary hidden">Copy to Clipboard</button>
             </div>
-            <!-- Loader element -->
             <div class="loader hidden" id="loader"></div>
         </form>
         <div id="comparison"></div>
         <div class="alert alert-danger" id="errorAlert"></div>
     </div>
 
-    <!-- Modal -->
+    <div class="container mt-5">
+        <div id="questionSection" class="hidden">
+            <h2>Ask a Question</h2>
+            <div class="form-group">
+                <textarea class="form-control" id="userQuestion" placeholder="Ask a question based on the review..."></textarea>
+            </div>
+            <button class="btn btn-primary" id="askQuestionBtn">Ask Question</button>
+            <div id="questionResponse" class="mt-3"></div>
+        </div>
+    </div>
+
     <div class="modal fade" id="contentModal" tabindex="-1" role="dialog" aria-labelledby="contentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -119,14 +126,27 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function(){
-            $('#resumeForm').submit(function(event){
+            $('#compareBtn').click(function(event){
                 event.preventDefault();
-                var formData = new FormData(this);
+                var formData = new FormData($('#resumeForm')[0]);
+                var jobDescription = $('#jobDescription').val().trim();
+                var resumeFile = $('#resume').prop('files')[0];
 
-                // Show loader and hide copy button and error alert
                 $('#loader').removeClass('hidden');
                 $('#copyButton').addClass('hidden');
                 $('#errorAlert').hide();
+
+                if (!resumeFile) {
+                    $('#errorAlert').text('Please upload a resume to compare.').show();
+                    $('#loader').addClass('hidden');
+                    return;
+                }
+
+                if (!jobDescription) {
+                    $('#errorAlert').text('Please provide a Job Description for comparison.').show();
+                    $('#loader').addClass('hidden');
+                    return;
+                }
 
                 $.ajax({
                     url: '/compare',
@@ -140,7 +160,9 @@
                             var converter = new showdown.Converter();
                             var html = converter.makeHtml(response.comparison);
                             $('#markdown').html(html);
-                            // Show copy button
+
+                            $('#questionSection').removeClass('hidden');
+
                             $('#copyButton').removeClass('hidden');
                         } else if (response.error) {
                             $('#errorAlert').text(response.error).show();
@@ -150,16 +172,89 @@
                         $('#errorAlert').text('The file format is invalid! Please try again.').show();
                     },
                     complete: function() {
-                        // Hide loader when request completes (success or failure)
                         $('#loader').addClass('hidden');
                     }
                 });
             });
 
-            $('#copyButton').click(function(event) {
-                // Prevent default button behavior
+            $('#reviewBtn').click(function(event){
                 event.preventDefault();
-                // Create a temporary textarea element
+                var formData = new FormData($('#resumeForm')[0]);
+                var resumeFile = $('#resume').prop('files')[0];
+
+                $('#loader').removeClass('hidden');
+                $('#copyButton').addClass('hidden');
+                $('#errorAlert').hide();
+
+                if (!resumeFile) {
+                    $('#errorAlert').text('Please upload a resume to review.').show();
+                    $('#loader').addClass('hidden');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/review',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response){
+                        if (response.review) {
+                            $('#comparison').html('<h2>Review Result:</h2><div id="markdown"></div>');
+                            var converter = new showdown.Converter();
+                            var html = converter.makeHtml(response.review);
+                            $('#markdown').html(html);
+
+                            $('#questionSection').removeClass('hidden');
+
+                            $('#copyButton').removeClass('hidden');
+                        } else if (response.error) {
+                            $('#errorAlert').text(response.error).show();
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#errorAlert').text('An error occurred while reviewing the resume. Please try again.').show();
+                    },
+                    complete: function() {
+                        $('#loader').addClass('hidden');
+                    }
+                });
+            });
+
+            $('#askQuestionBtn').click(function(event) {
+                event.preventDefault();
+                var reviewText = $('#markdown').text();
+                var userQuestion = $('#userQuestion').val();
+
+                if (!userQuestion.trim()) {
+                    alert("Please enter a question.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/ask_question',
+                    type: 'POST',
+                    data: {
+                        review_text: reviewText,
+                        user_question: userQuestion
+                    },
+                    success: function(response){
+                        if (response.response) {
+                            var converter = new showdown.Converter();
+                            var html = converter.makeHtml(response.response);
+                            $('#questionResponse').html(html);
+                        } else if (response.error) {
+                            $('#errorAlert').text(response.error).show();
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#errorAlert').text('An error occurred while asking the question. Please try again.').show();
+                    }
+                });
+            });
+
+            $('#copyButton').click(function(event) {
+                event.preventDefault();
                 var tempTextarea = document.createElement("textarea");
                 tempTextarea.value = $('#markdown').text();
                 document.body.appendChild(tempTextarea);
@@ -169,14 +264,15 @@
                 alert("Text copied to clipboard!");
             });
 
-            // Change form action when review button is clicked
-            $('#reviewBtn').click(function() {
-                $('#resumeForm').attr('action', '/review');
-            });
-
-            // Add click event listener for the "View PDF Content" button
             $('#viewPdfContentBtn').click(function(event) {
                 event.preventDefault();
+                var resumeFile = $('#resume').prop('files')[0];
+
+                if (!resumeFile) {
+                    $('#errorAlert').text('Please select a file to view the Resume content.').show();
+                    return;
+                }
+
                 var formData = new FormData($('#resumeForm')[0]);
                 $.ajax({
                     url: '/view_resume',
@@ -185,25 +281,23 @@
                     processData: false,
                     contentType: false,
                     success: function(response) {
-                        // Convert markdown to HTML and display it in the modal
                         var converter = new showdown.Converter();
                         var html = converter.makeHtml(response);
                         $('#formattedContent').html(html);
                         $('#contentModal').modal('show');
 
-                        // Set up the download button
                         $('#downloadBtn').off('click').on('click', function() {
                             var blob = new Blob([response], { type: 'text/plain' });
                             var link = document.createElement('a');
                             link.href = window.URL.createObjectURL(blob);
-                            link.download = 'formatted_resume.md';
+                            link.download = 'formatted_resume.txt';
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
                         });
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        $('#errorAlert').text('An error occurred while fetching the PDF content. Please try again.').show();
+                        $('#errorAlert').text('An error occurred while fetching the file. Please try again.').show();
                     }
                 });
             });

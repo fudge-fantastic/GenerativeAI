@@ -1,0 +1,77 @@
+Here is a rewritten version of your resume, organized and structured for clarity and readability:
+
+**Contact Information:**
++91 7972567926
+adi.pandagle@gmail.com
+LinkedIn
+Github
+
+**Summary:**
+Highly motivated and results-driven Data Scientist with expertise in MLOps and Generative AI, seeking a challenging role in a dynamic organization.
+
+**Key Competencies:**
+
+* **Machine Learning & Deep Learning:**
+	+ Supervised Learning: Linear & Logistics Regression, SVM, Decision-Tree, and Ensembles
+	+ Unsupervised Learning: K-Means, Hierarchical Clustering, and Dimensionality Reduction (PCA)
+	+ Neural Networks (ANN, CNN, and RNN), NLP, and DL Frameworks (TensorFlow and Keras)
+* **Data Science:**
+	+ Data Analysis & Visualization
+	+ Statistical Analysis & Modeling
+	+ Feature Engineering & Optimization Techniques
+* **Web Development, MLOps, and Programming Language:**
+	+ MLflow, Packaging, Version Control (Git), Docker, AWS, Jenkins, and CI/CD Pipeline
+	+ Flask, FastAPI, Django, Data Structures & Algorithms (DSA), Python, and MySQL
+* **Auxiliary Skills:**
+	+ Cloud (AWS)
+	+ Deep Learning (Fundamentals)
+	+ Packaging and Containerization
+	+ Version Control (git)
+	+ CI/CD (basics)
+	+ Large Language Model integration (Gemini and LLama)
+	+ Collaboration and Adaptability
+	+ Problem-solving and Inquisitive
+
+**Work and Projects:**
+
+**Machine Learning and Deep Learning:**
+
+* Fraud Detection: Identified fraudulent activities in financial transactions using ML algorithms on authentic datasets
+* Credit Risk Assessment: Developed predictive models to assess credit risk for loan applicants
+* House Rent Prediction: Built a model to predict house rent prices in India using machine learning algorithms
+* Customer Discount Offering: Devised a system to predict which customers will likely receive discounts for targeted marketing
+* American Sign Language Detection: Created a model to recognize and interpret American Sign Language gestures for communication accessibility
+
+**Generative-AI:**
+
+* OCR-Gemini: Integrated Tesseract for invoice text extraction and Gemini for data structuring the extracted data into JSON format
+* Resume-JD Analyzer: Implemented data extraction methods to input data into LLama3, facilitating analysis of job descriptions (JD) and resumes
+* Query-Builder: Developed a system that integrates PostgreSQL as the database backend, extracting key content, and seamlessly integrating it into LLama3 for query generation and execution
+
+**Others:**
+
+* MLOps Sandbox: Conducted MLOps integration testing (Docker, Jenkins, CI/CD)
+* Django: Built a web-based diabetes prediction model using Django
+
+**Education:**
+
+* Post-graduation Program in Data Science and Analytics - Imarticus Learning (Pune) (2023 - 2024) (TBD)
+* Bachelor's in Business Administration (Computer Application) - Modern College of Commerce & Computer Studies; Savitribai Phule Pune University Affiliated (2020 - 2023) CGPA - 8.61
+* Senior Secondary School - PDEA's Shri Mhalsakant Vidyalaya & Jr. College (2018 - 2020) - 55.69%
+* High School - S.P.M English Medium School, Nigdi-Pune (2007 - 2018) - 69.00%
+
+**Certifications and Achievements:**
+
+* Udemy: Python for Data Science and Machine Learning Bootcamp
+* Kaggle: Beginner and Intermediate Machine Learning
+* HackerRank: SQL Basic and Intermediate
+* Udemy: Python Data Structures and Algorithm
+* Udemy: Amazon Web Services - Solution Architect
+* Ranked 1st in chess competitions during both the 2nd and 3rd years of my academic journey
+
+**Languages:**
+
+* English
+* Hindi
+* Marathi (Native)
+* German and Japanese (Novice)

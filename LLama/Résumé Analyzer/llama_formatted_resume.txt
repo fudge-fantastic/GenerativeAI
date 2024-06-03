@@ -1,68 +1,75 @@
-I'd be happy to help you organize and review the resume text you extracted from a PDF. Here's a reorganized version, categorized into sections for easier readability:
+Here is an organized version of the resume text:
 
 **Contact Information**
 
+* Name: Aaditya Pandagle
+* Phone: +91 7972567926
 * Email: adi.pandagle@gmail.com
-* Phone: +91 79725 67926
-* LinkedIn: [link]
-* GitHub: [link]
+* LinkedIn: [LinkedIn profile URL]
+* Github: [Github profile URL]
 
-**Summary/Professional Summary**
-(not specified, but this is where a brief summary of your experience and skills would go)
+**Headline**
+Data Scientist specializing in MLOps and Generative AI seeking a position in a dynamic organization.
+
+**Portfolio**
+Available on GitHub, showcasing a range of successful projects, highlighting data analysis, predictive modeling, and collaboration within cross-functional teams.
+
+**Key Competencies**
+
+* **Machine Learning & Deep Learning**:
+	+ Supervised Learning (Linear & Logistics Regression, SVM, Decision-Tree, Ensembles)
+	+ Unsupervised Learning (K-Means, Hierarchical Clustering, Dimensionality Reduction-PCA)
+	+ Neural Networks (ANN, CNN, RNN), NLP, and DL Frameworks (TensorFlow, Keras)
+* **Data Science**:
+	+ Data Analysis & Visualization
+	+ Statistical Analysis & Modeling
+	+ Feature Engineering & Optimization Techniques
+* **Web Development, MLOps, and Programming Language**:
+	+ MLflow, Packaging, Version Control (Git), Docker, AWS, Jenkins, Prometheus, and CI/CD Pipeline
+	+ Flask, FastAPI, Django, Data Structures & Algorithms (DSA), Python, and MySQL
+* **Auxiliary Skills**:
+	+ Cloud (AWS)
+	+ Deep Learning (Fundamentals)
+	+ Packaging and Containerization
+	+ Version Control (git)
+	+ CI/CD (basics)
+	+ Large Language Model integration (Gemini, LLama)
+	+ Collaboration and Adaptability
+	+ Problem-solving and Inquisitive
+
+**Work and Projects**
+
+* **Machine Learning and Deep Learning**:
+	+ Fraud Detection
+	+ Credit Risk Assessment
+	+ House Rent Prediction
+	+ Customer Discount Offering
+	+ American Sign Language Detection
+* **Generative-AI**:
+	+ OCR-Gemini
+	+ Resume-JD Analyzer
+	+ Query-Builder
+* **Others**:
+	+ MLOps Sandbox (Docker, Jenkins, CI/CD)
+	+ Django (diabetes prediction model)
 
 **Education**
 
-* Post Graduation Program in Data Science and Analytics, Imarticus Learning (Pune), 2023-2024
-* Bachelor's in Business Administration (Computer Application), Modern College of Commerce & Computer Studies; Savitribai Phule Pune University Affiliated, 2020-2023
-* Senior Secondary School - PDEA's Shri Mhalsakant Vidyalaya & Jr. College, 2018-2020
-* High School - S.P.M English Medium School, Nigdi-Pune, 2007-2018
-
-**Skills**
-
-* **Machine Learning and Deep Learning**: Supervised Learning, Unsupervised Learning, Neural Networks, NLP, DL Frameworks (TensorFlow and Keras)
-* **Data Science**: Data Analysis & Visualization, Statistical Analysis & Modeling, Feature Engineering & Optimization Techniques
-* **MLOps**: MLflow, Packaging, Version Control (Git), Docker, Jenkins, Prometheus, and CI/CD Pipeline
-* **Web Development, Programming Languages & Databases**: Flask, FastAPI, Django, Data Structures & Algorithms (DSA), Python, and MySQL
-* **Cloud**: Amazon Web Services (EC2, S3, SageMaker, and others)
-* **Auxilary Skills**: Engineering, DSA (Basics), Web Development, Programming Languages, and Databases
-
-**Projects**
-(Note: These can be reordered or regrouped to better showcase your experience)
-
-* **Machine Learning**:
-	+ Fraud Detection: Identifying fraudulent activities within financial transactions using ML
-	+ Credit Risk Assessment: Assessing credit risk for loan applicants using predictive modeling
-	+ House Rent Prediction: Using machine learning algorithms to predict house rent prices in India
-	+ Customer Discount Offering Prediction: Predicting which customers will likely receive discounts for targeted marketing
-* **Deep Learning**:
-	+ American Sign Language Detection: Developed a model to recognize and interpret American Sign Language gestures for communication accessibility
-* **Generative-AI**:
-	+ OCR-Gemini: Leveraged Tesseract for invoice text extraction and Gemini for data structuring the extracted data into JSON format
-* **Other Projects**:
-	+ OAuth-JD Analyzer: Implementing data extraction methods to input data into LLama3, facilitating analysis of both job descriptions (JD) and resumes
-	+ Query-Builder: Utilizing PostgreSQL as the database backend, extracting key content, and seamlessly integrating it into LLama3 for query generation and execution
-	+ Django: Utilized Django to create a web-based diabetes prediction model
-	+ MLOps Sandbox: MLOps Integration Testing (Docker, Jenkins, CI/CD)
+* Post-Graduation Program in Data Science and Analytics - Imarticus Learning (Pune) (2023 - 2024) (TBD)
+* Bachelor's in Business Administration (Computer Application) - Modern College of Commerce & Computer Studies; Savitribai Phule Pune University Affiliated. (2020 - 2023) - CGPA: 8.61
+* Senior Secondary School - PDEA's Shri Mhalsakant Vidyalaya & Jr. College. (2018 - 2020) - 55.69%
+* High School - S.P.M English Medium School, Nigdi-Pune. (2007 - 2018) - 69.00%
 
 **Certifications and Achievements**
 
 * Udemy: Python for Data Science and Machine Learning Bootcamp
+* Kaggle: Beginner and Intermediate Machine Learning
+* HackerRank: SQL Basic and Intermediate
 * Udemy: Python Data Structures and Algorithm
 * Udemy: Amazon Web Services - Solution Architect
-* Kaggle - Beginner and Intermediate Machine Learning
-* HackerRank - SQL Basic and Intermediate
 * Ranked 1st in chess competitions during both the 2nd and 3rd years of academic journey
 
-**Hobbies**
+**Languages**
 
-* Avid Reader
-* Artist (sketching figures and objects)
-* Strategic Chess Player
-* Video/Board Games
-* Coding
-* Problem-solving
-* Inquisitive Listening
-* Creating Lo-fi tracks for fun on YouTube
-* LLamu( LLlama)
- AUX Skills:
- * GitHub-profile
+* English, Hindi, and Marathi (Native)
+* German and Japanese (Novice)
