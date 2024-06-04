@@ -55,6 +55,7 @@ def index():
     return render_template('index.html')
 
 DOCX_EXTENSION = '.docx'
+
 @app.route('/compare', methods=['POST'])
 def compare():
     try:
@@ -104,13 +105,13 @@ def review():
 
         if resume_file.filename.endswith('.pdf'):
             with pdfplumber.open(resume_file) as pdf:
-                all_text = "\n\n".join(page.extract_text(DOCX_EXTENSION) for page in pdf.pages if page.extract_text())
+                all_text = "\n\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
             all_text = clean_text(all_text)
-        elif resume_file.filename.endswith():
+        elif resume_file.filename.endswith(DOCX_EXTENSION):
             all_text = extract_text_from_docx(resume_file)
             all_text = clean_text(all_text)
         else:
-            raise ValueError('Unsupported file format. Please upload a PDF or DOCX file.')
+            raise ValueError(f'Unsupported file format. Please upload a PDF or {DOCX_EXTENSION} file.')
 
         review_prompt = f'''Please review the following resume text and provide a detailed analysis. Highlight strengths, weaknesses, and areas for improvement:
                             {all_text}'''
