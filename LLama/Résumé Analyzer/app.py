@@ -113,7 +113,7 @@ def review():
         else:
             raise ValueError(f'Unsupported file format. Please upload a PDF or {DOCX_EXTENSION} file.')
 
-        review_prompt = f'''Please review the following resume text and provide a detailed analysis. Highlight strengths, weaknesses, and areas for improvement:
+        review_prompt = f'''Please review the following resume text and provide a detailed analysis. Start with scoring, highlight strengths, weaknesses, and areas for improvement:
                             {all_text}'''
 
         review = get_llama_assistance(review_prompt)
@@ -133,13 +133,13 @@ def ask_question():
         if not review_text or not user_question:
             raise ValueError('Both review text and user question are required.')
 
-        prompt = f'''Based on the following content (given solely by you), answer the user's question in detail.
-        It can be any question, so remember to be friendly and open :) Don't mention your role.
-        Your Content Review:
-        {review_text}
+        prompt = f'''Based on the following review (given solely by you), answer the user's question in detail.
+        It can be any question, so be friendly and open :) Don't mention your role (Answer in normmal text, don't use markdown language, and remember the flow of conversation, it must not look like we're starting a new conversation, but a continuation of the review/content).
+        [Your Content Review:
+        {review_text}]
 
-        User Question:
-        {user_question}
+        [User Question:
+        {user_question}]
 
         Response:'''
         
@@ -181,4 +181,4 @@ def view_resume():
         return jsonify({'error': ERROR_MESSAGE}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host= "0.0.0.0", port= 8000, debug=True)

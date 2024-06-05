@@ -1,0 +1,6 @@
+Templates/Resume
+*.docx
+llama_formatted_resume.txt
+main_old.py
+structured_resume.txt
+text_extraction.py
