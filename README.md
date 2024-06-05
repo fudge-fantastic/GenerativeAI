@@ -1,4 +1,4 @@
-## [FastAPI - Learn FastAPI](https://fastapi.tiangolo.com/tutorial/)
+## [FastAPI - Learn FastAPI](https://fastapi.tiangolo.com/tutorial/) [Flask - Learn Flask](https://flask.palletsprojects.com/en/3.0.x/tutorial/)
 ```
 from fastapi import FastAPI
 app = FastAPI()
@@ -12,6 +12,13 @@ if __name__ == '__main__':
 ```
 1. fastapi dev main.py (in terminal) OR 
 2. python main.py (if using (if __name__ == '__main__'))
+3. Below is for Flask
+```
+# If not in Prod, debug=True, else, debug=False
+if __name__ == '__main__':
+	app.run(host = "0.0.0.0", port = "8000", debug = True)
+```
+
 
 ## [Tesseract-Fix](https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)
 
