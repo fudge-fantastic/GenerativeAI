@@ -5,17 +5,62 @@ import docx
 import re
 from flask import Flask, request, render_template, jsonify, send_file
 from groq import Groq
+from IPython.display import display_markdown
+import google.generativeai as genai 
 
 dotenv.load_dotenv()
-api_key = os.environ.get("GROQ_API_KEY")
+api_key_llama = os.environ.get("GROQ_API_KEY")
 
-if not api_key:
+if not api_key_llama:
     raise ValueError("GROQ_API_KEY environment variable not set")
 
 app = Flask(__name__)
 
+def generate_text(input_text):
+  dotenv.load_dotenv()  
+  api_key = os.environ.get("GOOGLE_API_KEY")
+  
+  safety_settings = [
+  {
+    "category": "HARM_CATEGORY_HARASSMENT",
+    "threshold": "BLOCK_NONE"
+  },
+  {
+    "category": "HARM_CATEGORY_HATE_SPEECH",
+    "threshold": "BLOCK_NONE"
+  },
+  {
+    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+    "threshold": "BLOCK_NONE"
+  },
+  {
+    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+    "threshold": "BLOCK_NONE"
+  }
+]
+
+  genai.configure(api_key=api_key)  
+
+  generation_config = {
+      "temperature": 1,
+      "top_p": 0.95,
+      "top_k": 64,
+      "max_output_tokens": 8192,
+      "response_mime_type": "text/plain",
+  }
+
+  model = genai.GenerativeModel(
+      model_name="gemini-1.5-pro-latest",
+      generation_config=generation_config, safety_settings=safety_settings,
+  )
+
+  chat_session = model.start_chat(history=[])
+  response = chat_session.send_message(input_text)
+  return response.text
+
+
 def get_llama_assistance(prompt):
-    client = Groq(api_key=api_key)
+    client = Groq(api_key=api_key_llama)
     completion = client.chat.completions.create(
         model="llama3-70b-8192",
         messages=[
@@ -59,12 +104,14 @@ DOCX_EXTENSION = '.docx'
 @app.route('/compare', methods=['POST'])
 def compare():
     try:
+        selected_model = request.form.get('selected_model')
         resume_file = request.files['resume']
         job_description = request.form.get('job_description')
 
         if not resume_file or not job_description:
             raise ValueError('Please provide both a Resume and a Job Description.')
 
+        
         if resume_file.filename.endswith('.pdf'):
             with pdfplumber.open(resume_file) as pdf:
                 all_text = "\n\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
@@ -75,19 +122,26 @@ def compare():
         else:
             raise ValueError(f'Unsupported file format. Please upload a PDF or {DOCX_EXTENSION} file.')
 
-        # Step to structure the document
-        structured_text = get_llama_assistance(f'''I need your help to organize and structure the Resume text, even personal information:
-                                                {all_text}''')
-
         main_role = '''[You're a professional consultant helping people land their dream job, by analyzing the job description and their resume details. YOU DO NOT HAVE TO MENTION YOUR ROLE TO THE USER, start direct to the point.
         You'll identify discrepancies, recommend areas for improvement, align candidate qualifications with company expectations, and outline areas of development. 
         This involves discerning the candidate's strengths and weaknesses, assessing their compatibility with the company's needs, and proposing actionable steps for improvement. 
         However, if the job description (JD) is entirely unrelated to the resume, strictly recommend them to prioritize focusing on the relevant areas instead of the unrelated ones.
         Note this: If you find both the Resume/Job-Description data is irrelevant, be bold and answer them about its irrelevance, be wild with the responses. One more thing, feel free to write as lengthy as you can]'''
 
-        comparison = get_llama_assistance(f'''{main_role}
-        Here's the Job Description: [{job_description}] 
-        And here's the Resume Details: [{structured_text}]''')
+        if selected_model == 'llama':
+            structured_text = get_llama_assistance(f'''I need your help to organize and structure the Resume text, even personal information:
+                                                {all_text}''')
+            comparison = get_llama_assistance(f'''{main_role}
+            Here's the Job Description: [{job_description}] 
+            And here's the Resume Details: [{structured_text}]''')
+        
+        else:
+            structured_text = generate_text(f'''I need your help to organize and structure the Resume text, even personal information:
+                                                {all_text}''')
+            
+            comparison = generate_text(f'''{main_role}
+            Here's the Job Description: [{job_description}] 
+            And here's the Resume Details: [{structured_text}]''')
 
         return jsonify({'comparison': comparison})
     except ValueError as e:
@@ -99,6 +153,7 @@ def compare():
 def review():
     try:
         resume_file = request.files['resume']
+        selected_model = request.form.get('selected_model')
 
         if not resume_file:
             raise ValueError('Please upload a resume to review.')
@@ -116,7 +171,10 @@ def review():
         review_prompt = f'''Please review the following resume text and provide a detailed analysis. Start with scoring, highlight strengths, weaknesses, and areas for improvement:
                             {all_text}'''
 
-        review = get_llama_assistance(review_prompt)
+        if selected_model == 'llama':
+            review = get_llama_assistance(review_prompt)
+        else:
+            review = generate_text(review_prompt)
 
         return jsonify({'review': review})
     except ValueError as e:
@@ -129,12 +187,13 @@ def ask_question():
     try:
         review_text = request.form.get('review_text')
         user_question = request.form.get('user_question')
+        selected_model = request.form.get('selected_model')
 
         if not review_text or not user_question:
             raise ValueError('Both review text and user question are required.')
 
         prompt = f'''Based on the following review (given solely by you), answer the user's question in detail.
-        It can be any question, so be friendly and open :) Don't mention your role (Answer in normmal text, don't use markdown language, and remember the flow of conversation, it must not look like we're starting a new conversation, but a continuation of the review/content).
+        It can be any question, so be friendly and open :) Don't mention your role.
         [Your Content Review:
         {review_text}]
 
@@ -143,7 +202,10 @@ def ask_question():
 
         Response:'''
         
-        response = get_llama_assistance(prompt)
+        if selected_model == 'llama':
+            response = get_llama_assistance(prompt)
+        else:
+            response = generate_text(prompt)
 
         return jsonify({'response': response})
     except ValueError as e:

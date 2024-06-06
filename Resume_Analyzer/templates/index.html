@@ -20,6 +20,7 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         textarea {
             height: 200px;
@@ -43,12 +44,10 @@
             margin: 0 auto;
             margin-top: 20px;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .hidden {
             display: none;
         }
@@ -64,10 +63,22 @@
             margin-top: 20px;
             display: none;
         }
+        .model-select-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="model-select-container">
+            <label for="modelSelect">Select Model:</label>
+            <select class="form-control" id="modelSelect">
+                <option value="llama">LLama3</option>
+                <option value="gemini">Gemini</option>
+            </select>
+        </div>
         <h1 class="mb-4">Resume Analyzer</h1>
         <form id="resumeForm" enctype="multipart/form-data">
             <div class="form-group">
@@ -131,6 +142,9 @@
                 var formData = new FormData($('#resumeForm')[0]);
                 var jobDescription = $('#jobDescription').val().trim();
                 var resumeFile = $('#resume').prop('files')[0];
+                var selectedModel = $('#modelSelect').val();
+
+                formData.append('selected_model', selectedModel);
 
                 $('#loader').removeClass('hidden');
                 $('#copyButton').addClass('hidden');
@@ -181,6 +195,9 @@
                 event.preventDefault();
                 var formData = new FormData($('#resumeForm')[0]);
                 var resumeFile = $('#resume').prop('files')[0];
+                var selectedModel = $('#modelSelect').val();
+
+                formData.append('selected_model', selectedModel);
 
                 $('#loader').removeClass('hidden');
                 $('#copyButton').addClass('hidden');
@@ -200,7 +217,7 @@
                     contentType: false,
                     success: function(response){
                         if (response.review) {
-                            $('#comparison').html('<h2>Review Result:</h2><div id="markdown"></div>');
+                            $('#comparison').html('<h2></h2><div id="markdown"></div>'); // Insert text of our choice
                             var converter = new showdown.Converter();
                             var html = converter.makeHtml(response.review);
                             $('#markdown').html(html);
@@ -221,85 +238,124 @@
                 });
             });
 
-            $('#askQuestionBtn').click(function(event) {
+            $('#viewPdfContentBtn').click(function(event){
                 event.preventDefault();
-                var reviewText = $('#markdown').text();
-                var userQuestion = $('#userQuestion').val();
-
-                if (!userQuestion.trim()) {
-                    alert("Please enter a question.");
-                    return;
-                }
-
-                $.ajax({
-                    url: '/ask_question',
-                    type: 'POST',
-                    data: {
-                        review_text: reviewText,
-                        user_question: userQuestion
-                    },
-                    success: function(response){
-                        if (response.response) {
-                            var converter = new showdown.Converter();
-                            var html = converter.makeHtml(response.response);
-                            $('#questionResponse').html(html);
-                        } else if (response.error) {
-                            $('#errorAlert').text(response.error).show();
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        $('#errorAlert').text('An error occurred while asking the question. Please try again.').show();
-                    }
-                });
-            });
-
-            $('#copyButton').click(function(event) {
-                event.preventDefault();
-                var tempTextarea = document.createElement("textarea");
-                tempTextarea.value = $('#markdown').text();
-                document.body.appendChild(tempTextarea);
-                tempTextarea.select();
-                document.execCommand("copy");
-                document.body.removeChild(tempTextarea);
-                alert("Text copied to clipboard!");
-            });
-
-            $('#viewPdfContentBtn').click(function(event) {
-                event.preventDefault();
+                var formData = new FormData($('#resumeForm')[0]);
                 var resumeFile = $('#resume').prop('files')[0];
+                var selectedModel = $('#modelSelect').val();
+
+                formData.append('selected_model', selectedModel);
+
+                $('#loader').removeClass('hidden');
+                $('#errorAlert').hide();
 
                 if (!resumeFile) {
-                    $('#errorAlert').text('Please select a file to view the Resume content.').show();
+                    $('#errorAlert').text('Please upload a resume to view its content.').show();
+                    $('#loader').addClass('hidden');
                     return;
                 }
 
-                var formData = new FormData($('#resumeForm')[0]);
                 $.ajax({
                     url: '/view_resume',
                     type: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function(response) {
-                        var converter = new showdown.Converter();
-                        var html = converter.makeHtml(response);
-                        $('#formattedContent').html(html);
-                        $('#contentModal').modal('show');
-
-                        $('#downloadBtn').off('click').on('click', function() {
-                            var blob = new Blob([response], { type: 'text/plain' });
-                            var link = document.createElement('a');
-                            link.href = window.URL.createObjectURL(blob);
-                            link.download = 'formatted_resume.txt';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        });
+                    success: function(response){
+                        if (response.formatted_content) {
+                            $('#formattedContent').html(response.formatted_content);
+                            $('#contentModal').modal('show');
+                        } else if (response.error) {
+                            $('#errorAlert').text(response.error).show();
+                        }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        $('#errorAlert').text('An error occurred while fetching the file. Please try again.').show();
+                        $('#errorAlert').text('An error occurred while processing the resume. Please try again.').show();
+                    },
+                    complete: function() {
+                        $('#loader').addClass('hidden');
                     }
                 });
+            });
+
+            $('#askQuestionBtn').click(function(event){
+                event.preventDefault();
+                var userQuestion = $('#userQuestion').val().trim();
+                var resumeFile = $('#resume').prop('files')[0];
+                var selectedModel = $('#modelSelect').val();
+                var jobDescription = $('#jobDescription').val().trim();
+
+                if (!userQuestion) {
+                    $('#errorAlert').text('Please enter a question to ask.').show();
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append('question', userQuestion);
+                formData.append('resume', resumeFile);
+                formData.append('job_description', jobDescription);
+                formData.append('selected_model', selectedModel);
+
+                $('#loader').removeClass('hidden');
+                $('#errorAlert').hide();
+
+                $.ajax({
+                    url: '/ask_question',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response){
+                        if (response.answer) {
+                            $('#questionResponse').html('<h3>Answer:</h3><p>' + response.answer + '</p>');
+                        } else if (response.error) {
+                            $('#errorAlert').text(response.error).show();
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#errorAlert').text('An error occurred while asking the question. Please try again.').show();
+                    },
+                    complete: function() {
+                        $('#loader').addClass('hidden');
+                    }
+                });
+            });
+
+            $('#downloadBtn').click(function(event){
+                event.preventDefault();
+                var formattedContent = $('#formattedContent').html();
+
+                if (!formattedContent) {
+                    $('#errorAlert').text('No content available to download.').show();
+                    return;
+                }
+
+                var link = document.createElement('a');
+                link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(formattedContent);
+                link.download = 'formatted_resume.txt';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            $('#copyButton').click(function(event){
+                event.preventDefault();
+                var comparisonContent = $('#markdown').text();
+
+                if (!comparisonContent) {
+                    $('#errorAlert').text('No content available to copy.').show();
+                    return;
+                }
+
+                var tempTextarea = document.createElement('textarea');
+                tempTextarea.value = comparisonContent;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+
+                alert('Comparison content copied to clipboard!');
             });
         });
     </script>
